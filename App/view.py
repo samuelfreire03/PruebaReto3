@@ -132,6 +132,7 @@ def printMenu():
     print("3- Avistamientos por ciudad y rango de duracion")
     print("4- Contar los avistamientos por duracion")
     print("5- Contar los avistamientos por fecha")
+    print("6- Contar los avistamientos por area")
     print("0- Salir")
 
 catalog = None
@@ -183,7 +184,7 @@ while True:
         fecha_final = (input("Escriba la fecha final que desea buscar: "))
         fecha_inicial = datetime.datetime.strptime(fecha_inicial, '%Y-%m-%d').date()
         fecha_final = datetime.datetime.strptime(fecha_final, '%Y-%m-%d').date()
-        respuesta = controller.tercer_req(cont,fecha_inicial,fecha_final)
+        respuesta = controller.cuarto_req(cont,fecha_inicial,fecha_final)
         print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(respuesta[0])+ '\n')
         print(('*'*90) + ('\n') +"Estas son el Top 5 de duracion mas largas: "+ '\n')
         print_FechaAntiguasyCantidad(respuesta[1])
@@ -192,6 +193,10 @@ while True:
         print_avistamientos(respuesta[3])
         print(('*'*90) + ('\n') +"Estos son los ultimos 3 avistamientos en el rango: : "+ '\n')
         print_avistamientos(respuesta[4])
+
+    elif int(inputs[0]) == 6:
+        for c in lt.iterator(om.keySet(cont['IndiceLongitud'])):
+            print(c)
 
 
     else:

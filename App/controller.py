@@ -81,10 +81,18 @@ def segundo_req(catalog, duracion_inicial, duracion_final):
     avistamientos = model.segundo_req(catalog, duracion_inicial, duracion_final)
     return avistamientos
 
-def tercer_req(catalog, fecha_inicial, fecha_final):
+def cuarto_req(catalog, fecha_inicial, fecha_final):
     """
     Retorna los libros que fueron publicados
     en un año
     """
-    avistamientos = model.tercer_req(catalog, fecha_inicial, fecha_final)
+    avistamientos = model.cuarto_req(catalog, fecha_inicial, fecha_final)
+    return avistamientos
+
+def quinto_req(catalog, fecha_inicial, fecha_final):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    avistamientos = model.quinto_req(catalog, fecha_inicial, fecha_final)
     return avistamientos

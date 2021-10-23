@@ -61,6 +61,8 @@ def newCatalogo():
                                       comparefunction=compareCiudad)
     catalog['IndiceFecha'] = om.newMap(omaptype='BST',
                                       comparefunction=compareCiudad)
+    catalog['IndiceLongitud'] = om.newMap(omaptype='BST',
+                                      comparefunction=compareCiudad)
 
     return catalog
 
@@ -73,6 +75,7 @@ def addAvistamiento(catalog, avistamiento):
     updateIndiceCiudad(catalog['IndiceCiudad'], avistamiento)
     updateIndiceDuracion(catalog['IndiceDuracionseg'], avistamiento)
     updateIndiceFecha(catalog['IndiceFecha'], avistamiento)
+    updateIndiceLongitud(catalog['IndiceLongitud'], avistamiento)
     return catalog
 
 def updateIndiceCiudad(map, avistamiento):
@@ -130,6 +133,25 @@ def updateIndiceFecha(map, avistamiento):
     else:
         datentry = me.getValue(entry)
     addFechaIndexsubFecha(datentry, avistamiento)
+    return map
+
+def updateIndiceLongitud(map, avistamiento):
+    """
+    Se toma la fecha del crimen y se busca si ya existe en el arbol
+    dicha fecha.  Si es asi, se adiciona a su lista de crimenes
+    y se actualiza el indice de tipos de crimenes.
+
+    Si no se encuentra creado un nodo para esa fecha en el arbol
+    se crea y se actualiza el indice de tipos de crimenes
+    """
+    tiempo = avistamiento['longitude']
+    entry = om.get(map, tiempo)
+    if entry is None:
+        datentry = newDataEntryLatitud(avistamiento)
+        om.put(map, tiempo, datentry)
+    else:
+        datentry = me.getValue(entry)
+    addLatitudIndex(datentry, avistamiento)
     return map
 
 def addFechaIndexDuracionseg(datentry, avistamiento):
@@ -197,6 +219,27 @@ def addFechaIndex(datentry, avistamiento):
         lt.addLast(entry['ListaAvistamientosporFecha'], avistamiento)
     return datentry
 
+def addLatitudIndex(datentry, avistamiento):
+    """
+    Actualiza un indice de tipo de crimenes.  Este indice tiene una lista
+    de crimenes y una tabla de hash cuya llave es el tipo de crimen y
+    el valor es una lista con los crimenes de dicho tipo en la fecha que
+    se está consultando (dada por el nodo del arbol)
+    """
+    lst = datentry['ListaAvistamientos']
+    lt.addLast(lst, avistamiento)
+    offenseIndex = datentry['LatitudIndice']
+    latitud = avistamiento['latitude']
+    offentry = om.get(offenseIndex, latitud)
+    if (offentry is None):
+        entry = newOffenseEntryLatitud(latitud, avistamiento)
+        lt.addLast(entry['ListaAvistamientosporFecha'], avistamiento)
+        om.put(offenseIndex, latitud, entry)
+    else:
+        entry = me.getValue(offentry)
+        lt.addLast(entry['ListaAvistamientosporFecha'], avistamiento)
+    return datentry
+
 # Funciones para creacion de datos
 
 def newDataEntry(crime):
@@ -222,6 +265,17 @@ def newDataEntryDuracionseg(crime):
                                       comparefunction=compareCiudad)
     return entry
 
+def newDataEntryLatitud(crime):
+    """
+    Crea una entrada en el indice por fechas, es decir en el arbol
+    binario.
+    """
+    entry = {'LatitudIndice': None, 'ListaAvistamientos': None}
+    entry['ListaAvistamientos'] = lt.newList('SINGLE_LINKED', compareCiudad)
+    entry['LatitudIndice'] = om.newMap(omaptype='BST',
+                                      comparefunction=compareCiudad)
+    return entry
+
 def newOffenseEntry(offensegrp, crime):
     """
     Crea una entrada en el indice por tipo de crimen, es decir en
@@ -229,6 +283,16 @@ def newOffenseEntry(offensegrp, crime):
     """
     ofentry = {'Fecha': None, 'ListaAvistamientosporFecha': None}
     ofentry['Fecha'] = offensegrp
+    ofentry['ListaAvistamientosporFecha'] = lt.newList('SINGLELINKED', compareCiudad)
+    return ofentry
+
+def newOffenseEntryLatitud(Latitud, crime):
+    """
+    Crea una entrada en el indice por tipo de crimen, es decir en
+    la tabla de hash, que se encuentra en cada nodo del arbol.
+    """
+    ofentry = {'Latitud': None, 'ListaAvistamientosporFecha': None}
+    ofentry['Latitud'] = Latitud
     ofentry['ListaAvistamientosporFecha'] = lt.newList('SINGLELINKED', compareCiudad)
     return ofentry
 
@@ -379,7 +443,42 @@ def segundo_req(catalogo,duracion_inicial,duracion_final):
         lista3ultimos = lt.subList(orden,int(lt.size(orden))-2,3)
         return total,medida,lista3primeros,lista3ultimos,duracion_top
 
-def tercer_req(catalogo,fecha_inicial,fecha_final):
+def cuarto_req(catalogo,fecha_inicial,fecha_final):
+
+    medida = om.size(catalogo['IndiceFecha'])
+    mas_antiguas_llaves = lt.subList(om.keySet(catalogo['IndiceFecha']),1,5)
+    top5antiguas = lt.newList('ARRAY_LIST')
+    for c in lt.iterator(mas_antiguas_llaves):
+        llavevalor = om.get(catalogo['IndiceFecha'],c)
+        cantidades = me.getValue(llavevalor)['ListaAvistamientos']
+        fechaycantidad = FechaMasAntiguas(c,lt.size(cantidades))
+        lt.addLast(top5antiguas,fechaycantidad)
+    llaves = om.keys(catalogo['IndiceFecha'],fecha_inicial,fecha_final)
+    total = 0
+    for c in lt.iterator(llaves):
+        llavevalor = om.get(catalogo['IndiceFecha'],c)
+        cantidades = me.getValue(llavevalor)['ListaAvistamientos']
+        total += int(lt.size(cantidades))
+    valores = om.values(catalogo['IndiceFecha'],fecha_inicial,fecha_final)
+    valores_primeros = lt.subList(valores,1,3)
+    listaavistamientosprimeros = lt.newList('ARRAY_LIST')
+    for k in lt.iterator(valores_primeros):
+        lista = k['ListaAvistamientos']
+        for j in lt.iterator(lista):
+            lt.addLast(listaavistamientosprimeros,j)
+    primeros_orden = sortDuracionRango(listaavistamientosprimeros)
+    primero3 = lt.subList(primeros_orden,1,3)
+    finales = lt.subList(valores,lt.size(valores)-2,3)
+    listaavistamientosultimos = lt.newList('ARRAY_LIST')
+    for l in lt.iterator(finales):
+        lista = l['ListaAvistamientos']
+        for t in lt.iterator(lista):
+            lt.addLast(listaavistamientosultimos,t)
+    ultimos_orden = sortDuracionRango(listaavistamientosultimos)
+    lista_final = lt.subList(ultimos_orden,int(lt.size(ultimos_orden))-2,3)
+    return medida,top5antiguas,total,primero3,lista_final
+
+def quinto_req(catalogo,fecha_inicial,fecha_final):
 
     medida = om.size(catalogo['IndiceFecha'])
     mas_antiguas_llaves = lt.subList(om.keySet(catalogo['IndiceFecha']),1,5)
