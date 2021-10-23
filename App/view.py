@@ -28,6 +28,8 @@ from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from prettytable import PrettyTable
 assert cf
+import datetime
+from datetime import date
 
 
 """
@@ -78,11 +80,58 @@ def print_avistamientos(author):
     else:
         print('No se encontro el autor.\n')
 
+def print_ciudadesorden(author):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if author:
+        print("\n")
+        x = PrettyTable(["Ciudad", "Cantidad"])
+        x._max_width = {"Ciudad" : 20, "Cantidad" : 20}
+        for artistas in lt.iterator(author):
+            x.add_row([artistas['NombreCiudad']+'\n', lt.size(artistas['ListaAvistamientos'])])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
+def print_duracionorden(author):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if author:
+        print("\n")
+        x = PrettyTable(["Duracion", "Cantidad"])
+        x._max_width = {"Duracion" : 20, "Cantidad" : 20}
+        for artistas in lt.iterator(author):
+            x.add_row([str(artistas['duracion'])+'\n', artistas['cantidad']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
+def print_FechaAntiguasyCantidad(author):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if author:
+        print("\n")
+        x = PrettyTable(["Fecha", "Cantidad"])
+        x._max_width = {"Fecha" : 20, "Cantidad" : 20}
+        for artistas in lt.iterator(author):
+            x.add_row([str(artistas['Fecha'])+'\n', artistas['cantidad']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
 def printMenu():
     print("Bienvenido")
     print("1- Crear el catalogo")
     print("2- Cargar información en el catálogo")
     print("3- Avistamientos por ciudad y rango de duracion")
+    print("4- Contar los avistamientos por duracion")
+    print("5- Contar los avistamientos por fecha")
     print("0- Salir")
 
 catalog = None
@@ -100,28 +149,50 @@ while True:
     elif int(inputs[0]) == 2:
         print("Cargando información de los archivos ....")
         controller.loadData(cont)
+        ciudades_orden = controller.sortCantidades(om.valueSet(cont['IndiceCiudad']))
         print('Avistamientos cargados: ' + str(lt.size(cont['avistamientos'])))
         print5Avistamientos(cont['avistamientos'])
 
     elif int(inputs[0]) == 3:
-        llavevalor = om.get(cont['IndiceCiudad'],'phoenix')
-        valor = me.getValue(llavevalor)['FechaIndice']
-        valores = om.valueSet(valor)
-        lista3primeros = lt.subList(valores,1,3)
-        primeros3avistamientos = lt.newList('ARRAY_LIST')
-        for c in lt.iterator(lista3primeros):
-            for j in lt.iterator(c['ListaAvistamientosporFecha']):
-                if int(lt.size(primeros3avistamientos)) < 3:
-                    lt.addLast(primeros3avistamientos,j)
-        print_avistamientos(primeros3avistamientos)
+        ciudad = input("Escriba la ciudad que quiere consultar: ")
+        respuesta = controller.primer_req(cont,ciudad,ciudades_orden)
+        print(('*'*90) + ('\n') +"Este es el Top 5 de ciudades con mas avistamientos: : "+ '\n')
+        print_ciudadesorden(respuesta[4])
+        print(('*'*90) + ('\n') +"El total de ciudades donde se reportaron avistamientos es de: "+ ' ' + str(respuesta[0])+ '\n')
+        print(('*'*90) + ('\n') +"El total de avistamientos reportados en la ciudad consultada es de: : "+ ' ' + str(respuesta[1])+ '\n')
+        print(('*'*90) + ('\n') +"Estos son los primeros 3 avistamientos de la ciudad: : "+ '\n')
+        print_avistamientos(respuesta[2])
+        print(('*'*90) + ('\n') +"Estos son los ultimos 3 avistamientos de la ciudad: : "+ '\n')
+        print_avistamientos(respuesta[3])
 
-        lista3ultimos = lt.subList(valores,int(lt.size(valores))-2,3)
-        ultimos3avistamientos = lt.newList('ARRAY_LIST')
-        for c in lt.iterator(lista3ultimos):
-            for j in lt.iterator(c['ListaAvistamientosporFecha']):
-                lt.addLast(ultimos3avistamientos,j)
-        lista_final = lt.subList(ultimos3avistamientos,int(lt.size(ultimos3avistamientos))-2,3)
-        print_avistamientos(lista_final)
+    elif int(inputs[0]) == 4:
+        duracion_inicial = float(input("Escriba la duracion inicial que desea buscar: "))
+        duracion_final = float(input("Escriba la duracion final que desea buscar: "))
+        respuesta = controller.segundo_req(cont,duracion_inicial,duracion_final)
+        print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(om.size(cont['IndiceDuracionseg']))+ '\n')
+        print(('*'*90) + ('\n') +"Estas son el Top 5 de duracion mas largas: "+ '\n')
+        print_duracionorden(respuesta[4])
+        print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(respuesta[0])+ '\n')
+        print(('*'*90) + ('\n') +"Estos son los primeros 3 avistamientos en el rango: : "+ '\n')
+        print_avistamientos(respuesta[2])
+        print(('*'*90) + ('\n') +"Estos son los ultimos 3 avistamientos en el rango: : "+ '\n')
+        print_avistamientos(respuesta[3])
+
+    elif int(inputs[0]) == 5:
+        fecha_inicial = (input("Escriba la fecha inicial que desea buscar: "))
+        fecha_final = (input("Escriba la fecha final que desea buscar: "))
+        fecha_inicial = datetime.datetime.strptime(fecha_inicial, '%Y-%m-%d').date()
+        fecha_final = datetime.datetime.strptime(fecha_final, '%Y-%m-%d').date()
+        respuesta = controller.tercer_req(cont,fecha_inicial,fecha_final)
+        print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(respuesta[0])+ '\n')
+        print(('*'*90) + ('\n') +"Estas son el Top 5 de duracion mas largas: "+ '\n')
+        print_FechaAntiguasyCantidad(respuesta[1])
+        print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(respuesta[2])+ '\n')
+        print(('*'*90) + ('\n') +"Estos son los primeros 3 avistamientos en el rango: : "+ '\n')
+        print_avistamientos(respuesta[3])
+        print(('*'*90) + ('\n') +"Estos son los ultimos 3 avistamientos en el rango: : "+ '\n')
+        print_avistamientos(respuesta[4])
+
 
     else:
         sys.exit(0)

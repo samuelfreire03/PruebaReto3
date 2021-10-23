@@ -45,7 +45,7 @@ def loadData(catalog):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    avistamientosfile = cf.data_dir + 'Ufo/UFOS-utf8-large.csv'
+    avistamientosfile = cf.data_dir + 'Ufo/UFOS-utf8-small.csv'
     input_file = csv.DictReader(open(avistamientosfile, encoding="utf-8"),
                                 delimiter=",")
     for avistamiento in input_file:
@@ -54,4 +54,37 @@ def loadData(catalog):
 
 # Funciones de ordenamiento
 
+def sortCantidades(catalog):
+    """
+    Ordena los artistas por nacimiento
+    """
+    orden = model.sortCantidades(catalog)
+    return orden
+
 # Funciones de consulta sobre el catálogo
+
+# Funciones de Requerimientos
+
+def primer_req(catalogo,ciudad,ciudades_orden):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    avistamientos = model.primer_req(catalogo, ciudad,ciudades_orden)
+    return avistamientos
+
+def segundo_req(catalog, duracion_inicial, duracion_final):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    avistamientos = model.segundo_req(catalog, duracion_inicial, duracion_final)
+    return avistamientos
+
+def tercer_req(catalog, fecha_inicial, fecha_final):
+    """
+    Retorna los libros que fueron publicados
+    en un año
+    """
+    avistamientos = model.tercer_req(catalog, fecha_inicial, fecha_final)
+    return avistamientos
