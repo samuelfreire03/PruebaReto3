@@ -125,6 +125,22 @@ def print_FechaAntiguasyCantidad(author):
     else:
         print('No se encontro el autor.\n')
 
+def print_avistamientosconlatitudylongitud(author):
+    """
+    Imprime la información del autor seleccionado
+    """
+    if author:
+        print("\n")
+        x = PrettyTable(["Fecha", "Ciudad", 'Pais','Duracion (Segundos)','Forma','Longitud','Latitud'])
+        x._max_width = {"Fecha" : 20, "Ciudad" : 20,"Pais" : 20, "Duracion (Segundos)" : 20,"Forma" : 20,"Longitud" : 20,"Latitud" : 20}
+        for artistas in lt.iterator(author):
+            x.add_row([artistas['datetime']+'\n', artistas['city'],artistas['country'],artistas['duration (seconds)'],artistas['shape'],artistas['longitude'],artistas['latitude']])
+        print(x)
+        print("\n")
+    else:
+        print('No se encontro el autor.\n')
+
+
 def printMenu():
     print("Bienvenido")
     print("1- Crear el catalogo")
@@ -195,8 +211,16 @@ while True:
         print_avistamientos(respuesta[4])
 
     elif int(inputs[0]) == 6:
-        for c in lt.iterator(om.keySet(cont['IndiceLongitud'])):
-            print(c)
+        longitud_inicial = float(input("Escriba la longitud inicial que desea buscar: "))
+        longitud_final = float(input("Escriba la longitud final que desea buscar: "))
+        latitud_inicial = float(input("Escriba la latitud inicial que desea buscar: "))
+        latitud_final = float(input("Escriba la latitud final que desea buscar: "))
+        respuesta = controller.quinto_req(cont,longitud_inicial,longitud_final,latitud_inicial,latitud_final)
+        print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(respuesta[0])+ '\n')
+        print(('*'*90) + ('\n') +"Estos son los primeros 5 avistamientos en el rango: : "+ '\n')
+        print_avistamientosconlatitudylongitud(respuesta[1])
+        print(('*'*90) + ('\n') +"Estos son los ultimos 5 avistamientos en el rango: : "+ '\n')
+        print_avistamientosconlatitudylongitud(respuesta[2])
 
 
     else:

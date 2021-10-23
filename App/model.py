@@ -144,7 +144,7 @@ def updateIndiceLongitud(map, avistamiento):
     Si no se encuentra creado un nodo para esa fecha en el arbol
     se crea y se actualiza el indice de tipos de crimenes
     """
-    tiempo = avistamiento['longitude']
+    tiempo = round(float(avistamiento['longitude']),2)
     entry = om.get(map, tiempo)
     if entry is None:
         datentry = newDataEntryLatitud(avistamiento)
@@ -229,7 +229,7 @@ def addLatitudIndex(datentry, avistamiento):
     lst = datentry['ListaAvistamientos']
     lt.addLast(lst, avistamiento)
     offenseIndex = datentry['LatitudIndice']
-    latitud = avistamiento['latitude']
+    latitud = round(float(avistamiento['latitude']),2)
     offentry = om.get(offenseIndex, latitud)
     if (offentry is None):
         entry = newOffenseEntryLatitud(latitud, avistamiento)
@@ -478,37 +478,22 @@ def cuarto_req(catalogo,fecha_inicial,fecha_final):
     lista_final = lt.subList(ultimos_orden,int(lt.size(ultimos_orden))-2,3)
     return medida,top5antiguas,total,primero3,lista_final
 
-def quinto_req(catalogo,fecha_inicial,fecha_final):
+def quinto_req(catalogo,longitud_inicial,longitud_final,latitud_inicial,latitud_final):
+    valores = om.values(catalogo['IndiceLongitud'],longitud_inicial,longitud_final)
+    final = lt.newList('ARRAY_LIST')
+    for c in lt.iterator(valores):
+        valores_latitud = om.values(c['LatitudIndice'],latitud_inicial,latitud_final)
+        if lt.size(valores_latitud) >= 1:
+            for j in lt.iterator(valores_latitud):
+                for k in lt.iterator(j['ListaAvistamientosporFecha']):
+                    lt.addLast(final,k)
+    orden_cronologico = sortDuracionRango(final)
+    total = lt.size(orden_cronologico)
+    if lt.size(orden_cronologico) >= 10:
+        primeros = lt.subList(orden_cronologico,1,5)
+        ultimos = lt.subList(orden_cronologico,lt.size(orden_cronologico)-4,5)
+    else: 
+        primeros = orden_cronologico
+        ultimos = orden_cronologico
 
-    medida = om.size(catalogo['IndiceFecha'])
-    mas_antiguas_llaves = lt.subList(om.keySet(catalogo['IndiceFecha']),1,5)
-    top5antiguas = lt.newList('ARRAY_LIST')
-    for c in lt.iterator(mas_antiguas_llaves):
-        llavevalor = om.get(catalogo['IndiceFecha'],c)
-        cantidades = me.getValue(llavevalor)['ListaAvistamientos']
-        fechaycantidad = FechaMasAntiguas(c,lt.size(cantidades))
-        lt.addLast(top5antiguas,fechaycantidad)
-    llaves = om.keys(catalogo['IndiceFecha'],fecha_inicial,fecha_final)
-    total = 0
-    for c in lt.iterator(llaves):
-        llavevalor = om.get(catalogo['IndiceFecha'],c)
-        cantidades = me.getValue(llavevalor)['ListaAvistamientos']
-        total += int(lt.size(cantidades))
-    valores = om.values(catalogo['IndiceFecha'],fecha_inicial,fecha_final)
-    valores_primeros = lt.subList(valores,1,3)
-    listaavistamientosprimeros = lt.newList('ARRAY_LIST')
-    for k in lt.iterator(valores_primeros):
-        lista = k['ListaAvistamientos']
-        for j in lt.iterator(lista):
-            lt.addLast(listaavistamientosprimeros,j)
-    primeros_orden = sortDuracionRango(listaavistamientosprimeros)
-    primero3 = lt.subList(primeros_orden,1,3)
-    finales = lt.subList(valores,lt.size(valores)-2,3)
-    listaavistamientosultimos = lt.newList('ARRAY_LIST')
-    for l in lt.iterator(finales):
-        lista = l['ListaAvistamientos']
-        for t in lt.iterator(lista):
-            lt.addLast(listaavistamientosultimos,t)
-    ultimos_orden = sortDuracionRango(listaavistamientosultimos)
-    lista_final = lt.subList(ultimos_orden,int(lt.size(ultimos_orden))-2,3)
-    return medida,top5antiguas,total,primero3,lista_final
+    return total,primeros,ultimos
