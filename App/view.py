@@ -54,7 +54,7 @@ def print5Avistamientos(avistamientos):
             x.add_row([primeros['datetime'], primeros['city'], primeros['state'],primeros['country'],primeros['shape'],primeros['duration (seconds)'],primeros['duration (hours/min)'],primeros['comments']+'\n',primeros['date posted'],primeros['latitude'],primeros['longitude']])
         print(x)
         print("\n")
-        print('5 primeras obras cargadas')
+        print('5 ultimas obras cargadas')
         ultimos5 = lt.subList(avistamientos,(int(lt.size(avistamientos))-4),5)
         y = PrettyTable(["Fecha", "Ciudad", 'Estado','Pais','Forma','Duracion (Segundos)','Duracion (Horas)','Comentarios','Fecha (Posteo)','Latitud','Longitud'])
         y._max_width = {"Fecha" : 10, "Ciudad" : 10,"Estado" : 10, "Pais" : 10,"Forma" : 10,"Duracion (Segundos)" : 10,"Duracion (Horas)" : 10,"Comentarios" : 10,"Fecha (Posteo)" : 10,"Latitud" : 10,"Longitud" : 10}
