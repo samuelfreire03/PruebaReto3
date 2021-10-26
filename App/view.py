@@ -201,7 +201,7 @@ while True:
         fecha_inicial = datetime.datetime.strptime(fecha_inicial, '%Y-%m-%d').date()
         fecha_final = datetime.datetime.strptime(fecha_final, '%Y-%m-%d').date()
         respuesta = controller.cuarto_req(cont,fecha_inicial,fecha_final)
-        print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(respuesta[0])+ '\n')
+        print(('*'*90) + ('\n') +"El total de diferentes fechas es de: "+ ' ' + str(respuesta[0])+ '\n')
         print(('*'*90) + ('\n') +"Estas son el Top 5 de duracion mas largas: "+ '\n')
         print_FechaAntiguasyCantidad(respuesta[1])
         print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(respuesta[2])+ '\n')
