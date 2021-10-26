@@ -149,7 +149,6 @@ def printMenu():
     print("4- Contar los avistamientos por duracion")
     print("5- Contar los avistamientos por fecha")
     print("6- Contar los avistamientos por area")
-    print("7- prueba")
     print("0- Salir")
 
 catalog = None
