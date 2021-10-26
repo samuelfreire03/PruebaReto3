@@ -374,6 +374,11 @@ def compareDuracionRango(artwork1, artwork2):
 
     return fecha1 < fecha2
 
+def comparefechasintermas(ciudad1, ciudad2):
+    fecha1 = ciudad1['Fecha']
+    fecha2 = ciudad2['Fecha']
+    return (fecha1) < (fecha2)
+
 # Funciones de ordenamiento
 
 def sortCantidades(catalog):
@@ -384,6 +389,11 @@ def sortCantidades(catalog):
 def sortDuracionRango(catalog):
 
     sorted_list = merge.sort(catalog, compareDuracionRango)
+    return sorted_list
+
+def sortFechasMapasinternos(catalog):
+
+    sorted_list = merge.sort(catalog, comparefechasintermas)
     return sorted_list
 
 # Funciones de Requerimientos
@@ -435,13 +445,25 @@ def segundo_req(catalogo,duracion_inicial,duracion_final):
         for c in lt.iterator(llaves):
             llavevalor = om.get(catalogo['IndiceDuracionseg'],c)
             cantidades = me.getValue(llavevalor)['ListaAvistamientos']
+            mapa = me.getValue(llavevalor)['FechaIndice']
             total += int(lt.size(cantidades))
-            for j in lt.iterator(me.getValue(llavevalor)['ListaAvistamientos']):
+            valores = om.valueSet(mapa)
+            for j in lt.iterator(valores):
                 lt.addLast(avistamientosrango,j)
-        orden = sortDuracionRango(avistamientosrango)
-        lista3primeros = lt.subList(orden,1,3)
-        lista3ultimos = lt.subList(orden,int(lt.size(orden))-2,3)
-        return total,medida,lista3primeros,lista3ultimos,duracion_top
+        orden = sortFechasMapasinternos(avistamientosrango)
+        orden3primeros = lt.subList(orden,1,3)
+        orden3ultimos = lt.subList(orden,lt.size(orden)-2,3)
+        fechassinorden = lt.newList('ARRAY_LIST')
+        for k in lt.iterator(orden3primeros):
+            for l in lt.iterator(k['ListaAvistamientosporFecha']):
+                lt.addLast(fechassinorden,l)
+        for k in lt.iterator(orden3ultimos):
+            for l in lt.iterator(k['ListaAvistamientosporFecha']):
+                lt.addLast(fechassinorden,l)
+        ordenfinal = sortDuracionRango(fechassinorden)
+        primeros3finales = lt.subList(ordenfinal,1,3)
+        ultimos3finales = lt.subList(ordenfinal,lt.size(ordenfinal)-2,3)
+        return total,medida,primeros3finales,ultimos3finales,duracion_top
 
 def cuarto_req(catalogo,fecha_inicial,fecha_final):
 
