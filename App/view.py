@@ -134,7 +134,7 @@ def print_avistamientosconlatitudylongitud(author):
         x = PrettyTable(["Fecha", "Ciudad", 'Pais','Duracion (Segundos)','Forma','Longitud','Latitud'])
         x._max_width = {"Fecha" : 20, "Ciudad" : 20,"Pais" : 20, "Duracion (Segundos)" : 20,"Forma" : 20,"Longitud" : 20,"Latitud" : 20}
         for artistas in lt.iterator(author):
-            x.add_row([artistas['datetime']+'\n', artistas['city'],artistas['country'],artistas['duration (seconds)'],artistas['shape'],artistas['longitude'],artistas['latitude']])
+            x.add_row([artistas['datetime']+'\n', artistas['city'],artistas['country'],artistas['duration (seconds)'],artistas['shape'],str(round(float(artistas['longitude']),2)),str(round(float(artistas['latitude']),2))])
         print(x)
         print("\n")
     else:

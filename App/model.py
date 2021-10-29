@@ -164,13 +164,12 @@ def addFechaIndexDuracionseg(datentry, avistamiento):
     lst = datentry['ListaAvistamientos']
     lt.addLast(lst, avistamiento)
     offenseIndex = datentry['FechaIndice']
-    fecha_avistamiento = avistamiento['datetime']
-    fecha_avistamiento = datetime.datetime.strptime(fecha_avistamiento, '%Y-%m-%d %H:%M:%S')
-    offentry = om.get(offenseIndex, fecha_avistamiento.date())
+    fecha_avistamiento = avistamiento['city'] + avistamiento['country']
+    offentry = om.get(offenseIndex, fecha_avistamiento)
     if (offentry is None):
-        entry = newOffenseEntryDuracionseg(fecha_avistamiento.date(), avistamiento)
+        entry = newOffenseEntryDuracionseg(fecha_avistamiento, avistamiento)
         lt.addLast(entry['ListaAvistamientosporFecha'], avistamiento)
-        om.put(offenseIndex, fecha_avistamiento.date(), entry)
+        om.put(offenseIndex, fecha_avistamiento, entry)
     else:
         entry = me.getValue(offentry)
         lt.addLast(entry['ListaAvistamientosporFecha'], avistamiento)
@@ -379,6 +378,11 @@ def comparefechasintermas(ciudad1, ciudad2):
     fecha2 = ciudad2['Fecha']
     return (fecha1) < (fecha2)
 
+def comparelatitudinterna(ciudad1, ciudad2):
+    fecha1 = ciudad1['Latitud']
+    fecha2 = ciudad2['Latitud']
+    return (fecha1) < (fecha2)
+
 # Funciones de ordenamiento
 
 def sortCantidades(catalog):
@@ -394,6 +398,11 @@ def sortDuracionRango(catalog):
 def sortFechasMapasinternos(catalog):
 
     sorted_list = merge.sort(catalog, comparefechasintermas)
+    return sorted_list
+
+def sortlatitudinterna(catalog):
+
+    sorted_list = merge.sort(catalog, comparelatitudinterna)
     return sorted_list
 
 # Funciones de Requerimientos
@@ -445,24 +454,27 @@ def segundo_req(catalogo,duracion_inicial,duracion_final):
         for c in lt.iterator(llaves):
             llavevalor = om.get(catalogo['IndiceDuracionseg'],c)
             cantidades = me.getValue(llavevalor)['ListaAvistamientos']
-            mapa = me.getValue(llavevalor)['FechaIndice']
             total += int(lt.size(cantidades))
-            valores = om.valueSet(mapa)
-            for j in lt.iterator(valores):
-                lt.addLast(avistamientosrango,j)
-        orden = sortFechasMapasinternos(avistamientosrango)
-        orden3primeros = lt.subList(orden,1,3)
-        orden3ultimos = lt.subList(orden,lt.size(orden)-2,3)
-        fechassinorden = lt.newList('ARRAY_LIST')
-        for k in lt.iterator(orden3primeros):
-            for l in lt.iterator(k['ListaAvistamientosporFecha']):
-                lt.addLast(fechassinorden,l)
-        for k in lt.iterator(orden3ultimos):
-            for l in lt.iterator(k['ListaAvistamientosporFecha']):
-                lt.addLast(fechassinorden,l)
-        ordenfinal = sortDuracionRango(fechassinorden)
-        primeros3finales = lt.subList(ordenfinal,1,3)
-        ultimos3finales = lt.subList(ordenfinal,lt.size(ordenfinal)-2,3)
+        sublistaprimeros = lt.subList(llaves,1,3)
+        for primeros in lt.iterator(sublistaprimeros):
+            llave_valor_primeros = om.get(catalogo['IndiceDuracionseg'],primeros)
+            mapa = me.getValue(llave_valor_primeros)['FechaIndice']
+            for ciudad in lt.iterator(om.keySet(mapa)):
+                llavevalorciudad = om.get(mapa,ciudad)
+                valorciudad = me.getValue(llavevalorciudad)['ListaAvistamientosporFecha']
+                for j in lt.iterator(valorciudad):
+                    lt.addLast(avistamientosrango,j)
+        sublistaultimos = lt.subList(llaves,lt.size(llaves)-2,3)
+        for ultimos in lt.iterator(sublistaultimos):
+            llave_valor_primeros = om.get(catalogo['IndiceDuracionseg'],ultimos)
+            mapa = me.getValue(llave_valor_primeros)['FechaIndice']
+            for ciudad in lt.iterator(om.keySet(mapa)):
+                llavevalorciudad = om.get(mapa,ciudad)
+                valorciudad = me.getValue(llavevalorciudad)['ListaAvistamientosporFecha']
+                for j in lt.iterator(valorciudad):
+                    lt.addLast(avistamientosrango,j)
+        primeros3finales = lt.subList(avistamientosrango,1,3)
+        ultimos3finales = lt.subList(avistamientosrango,lt.size(avistamientosrango)-2,3)
         return total,medida,primeros3finales,ultimos3finales,duracion_top
 
 def cuarto_req(catalogo,fecha_inicial,fecha_final):
@@ -511,11 +523,27 @@ def quinto_req(catalogo,longitud_inicial,longitud_final,latitud_inicial,latitud_
                     lt.addLast(final,k)
     orden_cronologico = sortDuracionRango(final)
     total = lt.size(orden_cronologico)
-    if lt.size(orden_cronologico) >= 10:
-        primeros = lt.subList(orden_cronologico,1,5)
-        ultimos = lt.subList(orden_cronologico,lt.size(orden_cronologico)-4,5)
+    orden = lt.newList('ARRAY_LIST')
+    resultados = lt.newList('ARRAY_LIST')
+    for c in lt.iterator(valores):
+        valores_latitud = om.values(c['LatitudIndice'],latitud_inicial,latitud_final)
+        if lt.size(valores_latitud) >= 1:
+            for j in lt.iterator(valores_latitud):
+                    lt.addLast(orden,j)
+    orden_latitud_longitud = sortlatitudinterna(orden)
+    primeros5 = lt.subList(orden_latitud_longitud,1,5)
+    for k in lt.iterator(primeros5):
+        for l in lt.iterator(k['ListaAvistamientosporFecha']):
+            lt.addLast(resultados,l)
+    ultimos5 = lt.subList(orden_latitud_longitud,lt.size(orden_latitud_longitud)-4,5)
+    for k in lt.iterator(ultimos5):
+        for l in lt.iterator(k['ListaAvistamientosporFecha']):
+            lt.addLast(resultados,l)
+    if lt.size(resultados) >= 10:
+        primeros = lt.subList(resultados,1,5)
+        ultimos = lt.subList(resultados,lt.size(resultados)-4,5)
     else: 
-        primeros = orden_cronologico
-        ultimos = orden_cronologico
+        primeros = resultados
+        ultimos = resultados
 
     return total,primeros,ultimos
