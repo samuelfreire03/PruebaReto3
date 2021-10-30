@@ -131,10 +131,10 @@ def print_avistamientosconlatitudylongitud(author):
     """
     if author:
         print("\n")
-        x = PrettyTable(["Fecha", "Ciudad", 'Pais','Duracion (Segundos)','Forma','Longitud','Latitud'])
-        x._max_width = {"Fecha" : 20, "Ciudad" : 20,"Pais" : 20, "Duracion (Segundos)" : 20,"Forma" : 20,"Longitud" : 20,"Latitud" : 20}
+        x = PrettyTable(["Fecha", "Ciudad", 'Pais','Duracion (Segundos)','Forma','Latitud','Longitud'])
+        x._max_width = {"Fecha" : 20, "Ciudad" : 20,"Pais" : 20, "Duracion (Segundos)" : 20,"Forma" : 20,"Latitud" : 20,"Longitud" : 20}
         for artistas in lt.iterator(author):
-            x.add_row([artistas['datetime']+'\n', artistas['city'],artistas['country'],artistas['duration (seconds)'],artistas['shape'],str(round(float(artistas['longitude']),2)),str(round(float(artistas['latitude']),2))])
+            x.add_row([artistas['datetime']+'\n', artistas['city'],artistas['country'],artistas['duration (seconds)'],artistas['shape'],str(round(float(artistas['latitude']),2)),str(round(float(artistas['longitude']),2))])
         print(x)
         print("\n")
     else:
@@ -202,7 +202,7 @@ while True:
         fecha_final = datetime.datetime.strptime(fecha_final, '%Y-%m-%d').date()
         respuesta = controller.cuarto_req(cont,fecha_inicial,fecha_final)
         print(('*'*90) + ('\n') +"El total de diferentes fechas es de: "+ ' ' + str(respuesta[0])+ '\n')
-        print(('*'*90) + ('\n') +"Estas son el Top 5 de duracion mas largas: "+ '\n')
+        print(('*'*90) + ('\n') +"Estas son el Top 5 de fechas mas antiguas: "+ '\n')
         print_FechaAntiguasyCantidad(respuesta[1])
         print(('*'*90) + ('\n') +"El total de avistamientos en el rango es de: "+ ' ' + str(respuesta[2])+ '\n')
         print(('*'*90) + ('\n') +"Estos son los primeros 3 avistamientos en el rango: : "+ '\n')
