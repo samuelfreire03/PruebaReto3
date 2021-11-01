@@ -514,15 +514,11 @@ def cuarto_req(catalogo,fecha_inicial,fecha_final):
 
 def quinto_req(catalogo,longitud_inicial,longitud_final,latitud_inicial,latitud_final):
     valores = om.values(catalogo['IndiceLongitud'],longitud_inicial,longitud_final)
-    final = lt.newList('ARRAY_LIST')
+    total = 0
     for c in lt.iterator(valores):
         valores_latitud = om.values(c['LatitudIndice'],latitud_inicial,latitud_final)
-        if lt.size(valores_latitud) >= 1:
-            for j in lt.iterator(valores_latitud):
-                for k in lt.iterator(j['ListaAvistamientosporFecha']):
-                    lt.addLast(final,k)
-    orden_cronologico = sortDuracionRango(final)
-    total = lt.size(orden_cronologico)
+        for j in lt.iterator(valores_latitud):
+            total += lt.size(j['ListaAvistamientosporFecha'])
     orden = lt.newList('ARRAY_LIST')
     resultados = lt.newList('ARRAY_LIST')
     for c in lt.iterator(valores):
