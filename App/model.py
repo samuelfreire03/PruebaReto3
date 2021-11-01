@@ -451,6 +451,7 @@ def segundo_req(catalogo,duracion_inicial,duracion_final):
         llaves = om.keys(catalogo['IndiceDuracionseg'],duracion_inicial,duracion_final)
         total = 0
         avistamientosrango = lt.newList('ARRAY_LIST')
+        avistamientosrangofinal = lt.newList('ARRAY_LIST')
         for c in lt.iterator(llaves):
             llavevalor = om.get(catalogo['IndiceDuracionseg'],c)
             cantidades = me.getValue(llavevalor)['ListaAvistamientos']
@@ -462,8 +463,7 @@ def segundo_req(catalogo,duracion_inicial,duracion_final):
             for ciudad in lt.iterator(om.keySet(mapa)):
                 llavevalorciudad = om.get(mapa,ciudad)
                 valorciudad = me.getValue(llavevalorciudad)['ListaAvistamientosporFecha']
-                for j in lt.iterator(valorciudad):
-                    lt.addLast(avistamientosrango,j)
+                lt.addLast(avistamientosrango,valorciudad)
         sublistaultimos = lt.subList(llaves,lt.size(llaves)-2,3)
         for ultimos in lt.iterator(sublistaultimos):
             llave_valor_primeros = om.get(catalogo['IndiceDuracionseg'],ultimos)
@@ -471,10 +471,12 @@ def segundo_req(catalogo,duracion_inicial,duracion_final):
             for ciudad in lt.iterator(om.keySet(mapa)):
                 llavevalorciudad = om.get(mapa,ciudad)
                 valorciudad = me.getValue(llavevalorciudad)['ListaAvistamientosporFecha']
-                for j in lt.iterator(valorciudad):
-                    lt.addLast(avistamientosrango,j)
-        primeros3finales = lt.subList(avistamientosrango,1,3)
-        ultimos3finales = lt.subList(avistamientosrango,lt.size(avistamientosrango)-2,3)
+                lt.addLast(avistamientosrango,valorciudad)
+        for ciudades in lt.iterator(avistamientosrango):
+            for internas in lt.iterator(ciudades):
+                lt.addLast(avistamientosrangofinal,internas)
+        primeros3finales = lt.subList(avistamientosrangofinal,1,3)
+        ultimos3finales = lt.subList(avistamientosrangofinal,lt.size(avistamientosrangofinal)-2,3)
         return total,medida,primeros3finales,ultimos3finales,duracion_top
 
 def cuarto_req(catalogo,fecha_inicial,fecha_final):
